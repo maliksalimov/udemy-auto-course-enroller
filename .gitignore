@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Browser Profile (Sensitive: Contains login cookies)
+udemy_profile/
+
+# Personal Data
+history.json
+enrollment_report.md
+debug_course.png
+
+# System
+.DS_Store
+*.log
