@@ -42,6 +42,8 @@ Run the scraper:
 node get_courses.js
 ```
 
+Once running, you can type `stop` and press Enter in the terminal to safely stop the script after the current course is finished.
+
 ### Manual Login Helper
 If you just want to log in and save the session without running the scraper:
 ```bash
