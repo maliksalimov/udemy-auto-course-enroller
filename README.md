@@ -17,8 +17,9 @@ It features:
 ## Installation
 
 1.  Clone the repository.
-2.  Install dependencies:
+2.  Install dependencies (ensure you use Node 16+):
     ```bash
+    nvm use 16
     npm install
     ```
 
@@ -39,7 +40,12 @@ It features:
 Run the scraper:
 
 ```bash
-node get_courses.js
+# Ensure you are using Node 16+
+nvm use 16
+
+# Run the scraper
+npm start
+# OR: node get_courses.js
 ```
 
 Once running, you can type `stop` and press Enter in the terminal to safely stop the script after the current course is finished.
@@ -47,7 +53,8 @@ Once running, you can type `stop` and press Enter in the terminal to safely stop
 ### Manual Login Helper
 If you just want to log in and save the session without running the scraper:
 ```bash
-node login.js
+npm run login
+# OR: node login.js
 ```
 
 ## Disclaimer
