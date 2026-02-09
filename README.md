@@ -20,7 +20,11 @@ It features:
 
 ## Installation
 
-1.  Clone the repository.
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/maliksalimov/udemy-auto-course-enroller.git
+    cd udemy-auto-course-enroller
+    ```
 2.  Install dependencies (ensure you use Node 16+):
     ```bash
     nvm use 16
