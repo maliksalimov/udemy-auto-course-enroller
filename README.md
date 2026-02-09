@@ -60,14 +60,10 @@ npm start
 # Scrape specific language:
 node get_courses.js -en  # English
 node get_courses.js -tr  # Turkish
-node get_courses.js -es  # Spanish
-node get_courses.js -fr  # French
-node get_courses.js -de  # German
-node get_courses.js -it  # Italian
-node get_courses.js -pt  # Portuguese
-node get_courses.js -ru  # Russian
-node get_courses.js -ar  # Arabic
-node get_courses.js -ja  # Japanese
+
+# Scrape MULTIPLE languages (sequentially):
+node get_courses.js -en -tr -de
+# The above will scrape all English courses, then all Turkish, then all German.
 ```
 
 ### Controlling the Script

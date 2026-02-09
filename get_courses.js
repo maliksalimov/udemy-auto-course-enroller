@@ -65,17 +65,26 @@ async function main() {
 
     // Parse Arguments for Language
     const args = process.argv.slice(2);
-    let selectedLang = 'All';
+    let targets = [];
 
     for (const arg of args) {
         if (languageMap[arg]) {
-            config.baseUrl = `https://www.couponami.com/language/${languageMap[arg]}`;
-            selectedLang = languageMap[arg];
-            break; // Support one language at a time
+            targets.push({
+                url: `https://www.couponami.com/language/${languageMap[arg]}`,
+                name: languageMap[arg]
+            });
         }
     }
 
-    console.log(`Target: ${config.baseUrl} (${selectedLang})`);
+    // Default to 'All' if no valid language args found
+    if (targets.length === 0) {
+        targets.push({
+            url: config.baseUrl, // Default from config (usually /all)
+            name: 'All'
+        });
+    }
+
+    console.log(`Targets: ${targets.map(t => t.name).join(', ')}`);
     console.log(`Config: Headless=${config.headless}, MaxPages=${config.maxPages}`);
 
     const browser = await puppeteer.launch({
@@ -90,92 +99,11 @@ async function main() {
         userDataDir: config.userDataDir
     });
 
-    let currentPage = config.startPage;
-    let coursesProcessed = 0;
-
     try {
-        while (true) {
-            if (config.maxPages > 0 && currentPage > config.maxPages) {
-                console.log(`Reached max pages limit (${config.maxPages}). Stopping.`);
-                break;
-            }
-
-            if (shouldStop) {
-                console.log('Gracefully stopping as requested.');
-                break;
-            }
-
-            const url = currentPage === 1
-                ? config.baseUrl
-                : `${config.baseUrl}/${currentPage}`;
-
-            console.log(`\n=== Scraping Page ${currentPage}: ${url} ===`);
-
-            const page = await browser.newPage();
-
-            try {
-                await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-                console.log('Scrolling to load courses...');
-                await autoScroll(page);
-
-                console.log('Extracting course links...');
-                const courses = await page.evaluate(() => {
-                    const links = Array.from(document.querySelectorAll('a.card-header'));
-                    return links.map(link => ({
-                        title: link.innerText.trim(),
-                        detailsUrl: link.href
-                    }));
-                });
-
-                console.log(`Found ${courses.length} courses on page ${currentPage}.`);
-
-                if (courses.length === 0) {
-                    console.log('No courses found on this page. Stopping.');
-                    try { await page.close(); } catch (e) { }
-                    break;
-                }
-
-                for (const [index, course] of courses.entries()) {
-                    console.log(`\n[P${currentPage} | ${index + 1}/${courses.length}] ${course.title}`);
-
-                    if (history[course.detailsUrl]) {
-                        console.log(`  Skipping: Already in history (${history[course.detailsUrl].status})`);
-                        continue;
-                    }
-
-                    if (shouldStop) {
-                        console.log('Stop signal received. Breaking loop.');
-                        break;
-                    }
-
-                    const status = await processCourse(browser, course);
-
-                    if (status === 'error_not_logged_in') {
-                        console.log('\n[CRITICAL] Not logged in. Stopping script.');
-                        console.log('Please run `npm run login` to sign in to Udemy manually.');
-                        shouldStop = true;
-                        break;
-                    }
-
-                    history[course.detailsUrl] = {
-                        title: course.title,
-                        status: status,
-                        date: new Date().toISOString()
-                    };
-                    saveHistory();
-                    coursesProcessed++;
-                }
-
-            } catch (err) {
-                console.error(`Error scraping page ${currentPage}: ${err.message}`);
-            }
-
-            try {
-                if (page && !page.isClosed()) await page.close();
-            } catch (e) {
-                console.log('  Warning: Could not close page (already closed?)');
-            }
-            currentPage++;
+        for (const target of targets) {
+            if (shouldStop) break;
+            console.log(`\n>>> Starting Category: ${target.name} (${target.url}) <<<`);
+            await scrapeCategory(browser, target.url);
         }
     } finally {
         console.log('\nClosing browser...');
@@ -185,9 +113,99 @@ async function main() {
             console.log('  Warning: Could not close browser (already closed?)');
         }
         rl.close();
-        console.log(`Done! Processed ${coursesProcessed} new courses.`);
-        addToReport(`Run finished. Processed ${coursesProcessed} new courses.`);
+        console.log(`Done!`);
     }
+}
+
+async function scrapeCategory(browser, baseUrl) {
+    let currentPage = config.startPage;
+    let coursesProcessed = 0;
+
+    while (true) {
+        if (config.maxPages > 0 && currentPage > config.maxPages) {
+            console.log(`Reached max pages limit (${config.maxPages}). Stopping category.`);
+            break;
+        }
+
+        if (shouldStop) {
+            console.log('Gracefully stopping as requested.');
+            break;
+        }
+
+        const url = currentPage === 1
+            ? baseUrl
+            : `${baseUrl}/${currentPage}`;
+
+        console.log(`\n=== Scraping Page ${currentPage}: ${url} ===`);
+
+        const page = await browser.newPage();
+
+        try {
+            await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+            console.log('Scrolling to load courses...');
+            await autoScroll(page);
+
+            console.log('Extracting course links...');
+            const courses = await page.evaluate(() => {
+                const links = Array.from(document.querySelectorAll('a.card-header'));
+                return links.map(link => ({
+                    title: link.innerText.trim(),
+                    detailsUrl: link.href
+                }));
+            });
+
+            console.log(`Found ${courses.length} courses on page ${currentPage}.`);
+
+            if (courses.length === 0) {
+                console.log('No courses found on this page. Finished category.');
+                try { await page.close(); } catch (e) { }
+                break;
+            }
+
+            for (const [index, course] of courses.entries()) {
+                console.log(`\n[P${currentPage} | ${index + 1}/${courses.length}] ${course.title}`);
+
+                if (history[course.detailsUrl]) {
+                    console.log(`  Skipping: Already in history (${history[course.detailsUrl].status})`);
+                    continue;
+                }
+
+                if (shouldStop) {
+                    console.log('Stop signal received. Breaking loop.');
+                    break;
+                }
+
+                const status = await processCourse(browser, course);
+
+                if (status === 'error_not_logged_in') {
+                    console.log('\n[CRITICAL] Not logged in. Stopping script.');
+                    console.log('Please run `npm run login` to sign in to Udemy manually.');
+                    shouldStop = true;
+                    break;
+                }
+
+                history[course.detailsUrl] = {
+                    title: course.title,
+                    status: status,
+                    date: new Date().toISOString()
+                };
+                saveHistory();
+                coursesProcessed++;
+            }
+
+        } catch (err) {
+            console.error(`Error scraping page ${currentPage}: ${err.message}`);
+        }
+
+        try {
+            if (page && !page.isClosed()) await page.close();
+        } catch (e) {
+            console.log('  Warning: Could not close page (already closed?)');
+        }
+        currentPage++;
+    }
+
+    addToReport(`Category finished: ${baseUrl}. Processed ${coursesProcessed} new courses.`);
 }
 
 async function processCourse(browser, course) {
