@@ -13,6 +13,10 @@ It features:
 *   [Node.js](https://nodejs.org/) (v16+ recommended)
 *   Google Chrome (installed on your system)
 *   A Udemy account
+*   **NPM Packages** (installed via `npm install`):
+    *   `puppeteer` & `puppeteer-extra`
+    *   `puppeteer-extra-plugin-stealth`
+    *   `puppeteer-extra-plugin-user-data-dir`
 
 ## Installation
 
