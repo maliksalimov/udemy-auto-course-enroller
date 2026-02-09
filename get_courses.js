@@ -118,6 +118,13 @@ async function main() {
 
                     const status = await processCourse(browser, course);
 
+                    if (status === 'error_not_logged_in') {
+                        console.log('\n[CRITICAL] Not logged in. Stopping script.');
+                        console.log('Please run `npm run login` to sign in to Udemy manually.');
+                        shouldStop = true;
+                        break;
+                    }
+
                     history[course.detailsUrl] = {
                         title: course.title,
                         status: status,
@@ -241,7 +248,12 @@ async function processUdemyEnrollment(page) {
         return !!(userMenu || myLearning);
     });
 
-    if (!isLoggedIn) console.log('  [Warning] User not logged in.');
+
+
+    if (!isLoggedIn) {
+        console.log('  [Error] User not logged in. Please run `npm run login` first.');
+        return 'error_not_logged_in';
+    }
 
     const isFree = await page.evaluate(() => {
         const priceContainer = document.querySelector('[data-purpose="price-text-message"]');
