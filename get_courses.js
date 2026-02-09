@@ -274,11 +274,7 @@ async function processUdemyEnrollment(page) {
             if (span.innerText.includes('Free') || span.innerText.includes('100% off')) return true;
         }
 
-        // Check for "Buy now" - definitively paid
-        const buyButton = document.querySelector('[data-purpose="buy-this-course-button"]');
-        if (buyButton && (buyButton.innerText.includes('Buy now') || buyButton.innerText.includes('Add to cart'))) {
-            return false;
-        }
+
 
         // If we see "Enroll now" but NO price text saying Free, default to caution (false)
         // Unless logic confirms price is $0.00
