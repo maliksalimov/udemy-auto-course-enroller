@@ -6,7 +6,7 @@ It features:
 *   **Smart Automation**: Bypasses redirects and finds valid coupons.
 *   **Pagination**: Scrapes multiple pages of courses automatically.
 *   **History Tracking**: Remembers enrolled courses to skip them in future runs.
-*   **Safe Enrollment**: Strictly checks for "Free" price tags to avoid accidental purchases.
+*   **Safe Enrollment**: Strictly checks for "Free" price tags. Adds courses to your cart or enrolls you, but **stops before checkout** so you can review.
 
 ### Prerequisites
 

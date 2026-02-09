@@ -265,9 +265,10 @@ async function processUdemyEnrollment(page) {
         const priceContainer = document.querySelector('[data-purpose="price-text-message"]');
         if (priceContainer && (priceContainer.innerText.includes('Free') || priceContainer.innerText.includes('100% off'))) return true;
 
-        // Strict Check: If we see "Buy now", it's definitely paid, or at least not a simple enroll.
+        // Strict Check: If we see "Buy now", it's definitely paid.
+        // We allow "Add to cart" now, as it might be a free course that needs cart addition.
         const buyButton = document.querySelector('[data-purpose="buy-this-course-button"]');
-        if (buyButton && (buyButton.innerText.includes('Buy now') || buyButton.innerText.includes('Add to cart'))) return false;
+        if (buyButton && buyButton.innerText.includes('Buy now')) return false;
 
         const priceText = document.querySelectorAll('[data-purpose="course-price-text"] span');
         for (const span of priceText) {
@@ -304,8 +305,7 @@ async function processUdemyEnrollment(page) {
         const buttons = Array.from(document.querySelectorAll('button'));
         return buttons.find(b => {
             const text = b.innerText || '';
-            // REMOVED "Add to cart" to be strictly free
-            return text.includes('Enroll now');
+            return text.includes('Enroll now') || text.includes('Add to cart');
         });
     });
 
@@ -323,19 +323,10 @@ async function processUdemyEnrollment(page) {
         await page.waitForTimeout(5000);
 
         if (page.url().includes('/cart/checkout')) {
-            console.log('  At checkout. Completing...');
-            try { await page.waitForSelector('button', { timeout: 5000 }); } catch (e) { }
-            const checkoutBtn = await page.evaluateHandle(() => {
-                const buttons = Array.from(document.querySelectorAll('button'));
-                return buttons.find(b => b.innerText.includes('Checkout'));
-            });
-            if (checkoutBtn.asElement()) {
-                console.log('  Clicking Checkout...');
-                await checkoutBtn.evaluate(b => b.click());
-                await page.waitForTimeout(5000);
-            }
+            console.log('  At checkout. added to cart. Skipping checkout completion as requested.');
+            return 'added_to_cart';
         }
-        return 'enrolled';
+        return 'enrolled_or_cart';
     } else {
         console.log('  Enroll button not found (already enrolled?).');
         return 'skipped_already_enrolled';
