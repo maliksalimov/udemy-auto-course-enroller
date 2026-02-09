@@ -53,7 +53,11 @@ async function main() {
         headless: config.headless,
         defaultViewport: null,
         executablePath: config.chromePath,
-        args: ['--start-maximized'],
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--start-maximized'
+        ],
         userDataDir: config.userDataDir
     });
 

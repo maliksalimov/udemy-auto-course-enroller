@@ -13,7 +13,12 @@ async function login() {
         headless: false,
         defaultViewport: null,
         executablePath: config.chromePath,
-        args: ['--start-maximized'],
+        executablePath: config.chromePath,
+        args: [
+            '--start-maximized',
+            '--no-sandbox',
+            '--disable-setuid-sandbox'
+        ],
         userDataDir: config.userDataDir
     });
 
