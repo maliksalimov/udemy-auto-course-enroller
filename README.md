@@ -53,8 +53,21 @@ Run the scraper:
 nvm use 16
 
 # Run the scraper
+# Run the scraper (Default: All languages)
 npm start
 # OR: node get_courses.js
+
+# Scrape specific language:
+node get_courses.js -en  # English
+node get_courses.js -tr  # Turkish
+node get_courses.js -es  # Spanish
+node get_courses.js -fr  # French
+node get_courses.js -de  # German
+node get_courses.js -it  # Italian
+node get_courses.js -pt  # Portuguese
+node get_courses.js -ru  # Russian
+node get_courses.js -ar  # Arabic
+node get_courses.js -ja  # Japanese
 ```
 
 ### Controlling the Script

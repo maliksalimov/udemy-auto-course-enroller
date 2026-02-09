@@ -48,6 +48,34 @@ function addToReport(text) {
 
 async function main() {
     console.log('Starting Udemy Course Scraper (Advanced Mode)...');
+
+    // Language Mapping
+    const languageMap = {
+        '-en': 'english',
+        '-tr': 'turkish',
+        '-de': 'german',
+        '-es': 'spanish',
+        '-fr': 'french',
+        '-pt': 'portuguese',
+        '-it': 'Italian',
+        '-ru': 'russian',
+        '-ar': 'arabic',
+        '-ja': 'japanese'
+    };
+
+    // Parse Arguments for Language
+    const args = process.argv.slice(2);
+    let selectedLang = 'All';
+
+    for (const arg of args) {
+        if (languageMap[arg]) {
+            config.baseUrl = `https://www.couponami.com/language/${languageMap[arg]}`;
+            selectedLang = languageMap[arg];
+            break; // Support one language at a time
+        }
+    }
+
+    console.log(`Target: ${config.baseUrl} (${selectedLang})`);
     console.log(`Config: Headless=${config.headless}, MaxPages=${config.maxPages}`);
 
     const browser = await puppeteer.launch({
