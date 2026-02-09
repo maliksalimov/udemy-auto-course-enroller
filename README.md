@@ -58,12 +58,25 @@ npm start
 # OR: node get_courses.js
 
 # Scrape specific language:
-node get_courses.js -en  # English
 node get_courses.js -tr  # Turkish
 
 # Scrape MULTIPLE languages (sequentially):
 node get_courses.js -en -tr -de
 # The above will scrape all English courses, then all Turkish, then all German.
+
+### Supported Languages
+| Flag | Language | URL Slug |
+| :--- | :--- | :--- |
+| `-en` | English | `english` |
+| `-tr` | Turkish | `turkish` |
+| `-de` | German | `german` |
+| `-es` | Spanish | `spanish` |
+| `-fr` | French | `french` |
+| `-pt` | Portuguese | `portuguese` |
+| `-it` | Italian | `Italian` |
+| `-ru` | Russian | `russian` |
+| `-ar` | Arabic | `arabic` |
+| `-ja` | Japanese | `japanese` |
 ```
 
 ### Controlling the Script
