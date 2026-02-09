@@ -8,10 +8,11 @@ It features:
 *   **History Tracking**: Remembers enrolled courses to skip them in future runs.
 *   **Safe Enrollment**: Strictly checks for "Free" price tags to avoid accidental purchases.
 
-## Prerequisites
+### Prerequisites
 
-*   [Node.js](https://nodejs.org/) (v16+ recommended)
-*   Google Chrome (installed on your system)
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [npm](https://www.npmjs.com/) (usually comes with Node.js)
+- Google Chrome (installed on your system)
 *   A Udemy account
 *   **NPM Packages** (installed via `npm install`):
     *   `puppeteer` & `puppeteer-extra`
@@ -56,7 +57,10 @@ npm start
 # OR: node get_courses.js
 ```
 
-Once running, you can type `stop` and press Enter in the terminal to safely stop the script after the current course is finished.
+### Controlling the Script
+
+- During execution, you can type `stop` and press Enter in the terminal to gracefully stop the script after it finishes the current page.
+- This ensures the browser closes properly and the report is saved.
 
 ### Manual Login Helper
 If you just want to log in and save the session without running the scraper:

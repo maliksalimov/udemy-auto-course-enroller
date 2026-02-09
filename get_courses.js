@@ -4,6 +4,7 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const config = require('./config');
 const readline = require('readline');
 
+
 puppeteer.use(StealthPlugin());
 
 // Terminal Interaction setup
@@ -71,7 +72,10 @@ async function main() {
                 break;
             }
 
-            if (shouldStop) break;
+            if (shouldStop) {
+                console.log('Gracefully stopping as requested.');
+                break;
+            }
 
             const url = currentPage === 1
                 ? config.baseUrl
@@ -152,6 +156,7 @@ async function main() {
         } catch (e) {
             console.log('  Warning: Could not close browser (already closed?)');
         }
+        rl.close();
         console.log(`Done! Processed ${coursesProcessed} new courses.`);
         addToReport(`Run finished. Processed ${coursesProcessed} new courses.`);
     }
@@ -256,6 +261,7 @@ async function processUdemyEnrollment(page) {
     }
 
     const isFree = await page.evaluate(() => {
+        // Strict check: must see "Free" or "100% off"
         const priceContainer = document.querySelector('[data-purpose="price-text-message"]');
         if (priceContainer && (priceContainer.innerText.includes('Free') || priceContainer.innerText.includes('100% off'))) return true;
 
@@ -268,14 +274,20 @@ async function processUdemyEnrollment(page) {
             if (span.innerText.includes('Free') || span.innerText.includes('100% off')) return true;
         }
 
-        const ctaButton = document.querySelector('[data-purpose="buy-this-course-button"]');
-        if (ctaButton && ctaButton.innerText.includes('Enroll now')) return true;
+        // Check for "Buy now" - definitively paid
+        const buyButton = document.querySelector('[data-purpose="buy-this-course-button"]');
+        if (buyButton && (buyButton.innerText.includes('Buy now') || buyButton.innerText.includes('Add to cart'))) {
+            return false;
+        }
+
+        // If we see "Enroll now" but NO price text saying Free, default to caution (false)
+        // Unless logic confirms price is $0.00
 
         return false;
     });
 
     if (!isFree) {
-        console.log('  Not free. Skipping.');
+        console.log('  Not explicitly marked as Free. Skipping for safety.');
         return 'skipped_not_free';
     }
 
